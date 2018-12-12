@@ -1,0 +1,76 @@
+variable,type,definition,level_or_unit,explanation
+General Site Information,,,,
+local_site_name,character,local site name,,local site name for cave or farm
+predict_site_name,character,PREDICT site name,,"If PREDICT site, what is the corresponding PREDICT site name?"
+alternate_site_name,character,alternate site name,,is there another name for this site?
+surveyor,character,names of surveyors,,
+survey_date,date,date of survey,,
+start_time,POSIXct,time survey began,,
+end_time,POSXIct,time survey ended,,
+site_latitude,numeric,"latitude of site, in decimal degrees",,
+site_longitude,numeric,"longitude of site, in decimal degrees",,
+gps_uncertainty,numeric,gps uncertainty of lat/long estimate,,if there is a known error estimate for a GPS estimate
+site_type,categorical,whether the site is a cave or farm site,cave; farm; other,
+access_control,character,what kind of access control is present at the farm or cave site,,What kind of barrier to access exists at the cave/farm site?
+farm_trees,character,trees that bats are roosting in on farm sites,,"which types of trees are bats roosting in? if the roost is artificial, what types of trees are being used to construct the artifical roost"
+artificial_roost,binary,if artifical roost is present,yes; no,"if farm site, is the roost artificial?"
+cave_height_low,numeric,"lowest cave entrance height, meters",,"the cave entrance at its lowest point. If there are multiple entrances to the cave, the lowest point of the lowest entrance"
+cave_height_high,numeric,"highest cave entrance height, meters",,"the cave entrance at its highest point. If there are multiple entrances to the cave, the highest point of the highest entrance"
+light_penetration,categorical,"in a cave, the degree to which light penetrates cave to guano area",0-20%; 21-50%; 51-80%; 81-100%,the approximate degree to which light penetrates the cave at the guano collection area (i.e. is the cave dark or bright?)
+height_harvest_area,integer,"in a cave, the height of the guano harvesting area",,the approximate height of the area in which guano is harvested
+water_coverage,categorical,the extent to which water covers the cave area,little to none (0-20%); some (21-50%); most or all (51-100%),if water covers the cave during guano harvesting season
+cave_navigation,categorical,ease of navigation into the cave,"walk in, open area; some difficulty walking, lower parts requiring ducking; difficulty navigating, crawling required",
+bats_present_harvest,binary,if bats are present when guano is being harvested,yes; no,
+bat_roost_size,character,approximate size of bast roost,,a best estimate of the total bat roost size in the farm or cave
+site_notes,character,"additional notes in the ""Site Information"" section of the survey",,
+Harvester Information,,,,
+number_of_harvesters,numeric,number of people harvesting guano,,
+harvester_age_range,character,age range of guano harvesters,,
+origin_of_harvesters,character,where harvesters are from,local; seasonal; other,if harvesters are from a local area or are temporary/migrant workers
+number_of_non_harvesters,character,number of non-harvesters in guano exposure area,,number of non-harvesters in the guano exposure area (i.e. the area where guano is being harvested). To measure whether or not the non-harvesters are being exposed to guano.
+duration_harvest,character,how many minutes per person a guano harvester spends in the guano exposure area (range),,
+frequency_of_harvesting,character,frequency of guano harvesting at site,daily; weekly; monthly; annually,"frequency that a site is harvested as x times per unit of week, month or year"
+frequency_per_person,character,frequency of harvesting per person,once every x days/weeks/month per year,frequency that a person is harvesting as x times per day/week/month per year
+months_harvested,character,months during which guano is harvested,,
+season_of_harvest,character,season during which guano is harvested,wet; dry; shoulder,
+limitations_to_harvesting,character,the limitations to guano harvesting,bat migration elsewhere; high water levels; other,
+collection_method,character,method of guano collection,shovelling; sweeping; use of hands only; other,
+activites_around_site,character,"which guano exposure activities are occuring, and which are occuring within the area of active guano harvesting",harvesting; packaging; storing; selling; drying; other; whether or not each of the aforementioned exposures occurs in guano exposure area,"guano exposure activities, and whether or not these exposures are occuring within the guano harvesting (exposure) area"
+harvester_notes,character,"additional notes in the ""Harvester Information"" section of survey",,
+Guano Information,,,,
+guano_weight_per_person,character,the amount of guano collected by weight,,"weight of guano that is collected x times per day/week/month per year, per person"
+guano_bag_per_person,character,the amount of guano collected by person,,"bags of guano that are collected x times per day/week/month per year, per person"
+guano_weight_total,character,the total volume of guano collected at site,,"weight of guano that is collected x times per day/week/month per year, total at site"
+guano_bag_total,character,the total bags of guano collected at site,,"bags of guano that are collected x times per day/week/month per year, total at site"
+guano_bag_size,character,the bag size of the guano,,"specify volume, weight, dimesions or other type of measurement"
+guano_fresh_dry,categorical,whether guano is fresh or dry at the time of collection,fresh; dry,
+guano_usage,character,the downstream use of guano,own use; storage on-site; selling for local use; selling for non-local use; processing; packaging to sell off-site,the purpose(s) for which guano is collected
+guano_sold_location,character,"if guano is sold directly, where it is sold to",,"where guano is sold to, if guano is sold directly, such as to a farm where livestock are grazing on guano-fed crops"
+bat_species_contribution,character,approximate bat species contribution of of guanon,,"bat species present that are contributing to guano on ground, and their relative contribution"
+guano_notes,character,"additional notes in the ""Guano Information"" section of survey",,
+Protective Practices and Equipment,,,,
+ppe_gloves,numeric,percentage of harvesters using gloves as PPE,,
+ppe_mask,numeric,percentage of harvesters using masks as PPE,,
+ppe_makeshift_mask,numeric,percentage of harvesters using makeshift masks as PPE,,
+ppe_goggles,numeric,percentage of harvesters using goggles as PPE,,
+ppe_shoes,numeric,percentage of harvesters using shoes as PPE,,
+ppe_clothing,numeric,percentage of harvesters using clothing specifically for harvesting as PPE,,
+ppe_other,numeric,percentage of harvesters using other forms of PPE,,
+ppe_other_type,character,"if harvesters are using a form of PPE not listed, what is it?",,
+wash_shoes,numeric,percentage of harvesters that are washing shoes after harvesting guano,,
+wash_feet,numeric,percentage of harvesters that are washing feet after harvesting guano,,
+wash_hands,numeric,percentage of harvesters that are washing hands after harvesting guano,,
+tools_shovels,numeric,percentage of harvesters using a shovel,,
+tools_spades,numeric,percentage of harvesters using a spade,,
+tools_brooms,numeric,percentage of harvesters using a broom,,
+tools_hands_only,numeric,percentage of harvesters using hands only,,
+tools_other,numeric,percentage of harvesters using other tools,,
+tools_other_type,character,"if harvesters are using a tool not listed, what is it?",,
+water_available,binary,availability of clean water for washing,yes; no,the availability of clean water to guano harvesters for washing after harvesting guano
+harvesters_washing,numeric,number of harvesters washing,,the number of harvesters that are washing after harvesting guano
+harvesters_washing_range,character,estimated range (percentage) of harvesters washing,,percentage range (estimated high to low) of harvesters that are washing after harvesting guano
+soap_available,binary,availability of soap for washing,yes; no,the availability of soap to guano harvesters for washing after harvesting guano
+harvesters_soaping,numeric,number of harvesters using soap,,the number of harvesters that are washing with soap after harvesting guano
+harvesters_soaping_range,character,estimated range (percentage) of harvesters soaping,,percentage range (estimated high to low) of harvesters that are washing with soap after harvesting guano
+footwear_religion,binary,if footwear is restricted due to religion,yes; no,
+notes,character,"overall comments, general observaitons, photos",,additional section to add information not captured in the site characterization questionnaire
