@@ -16,8 +16,8 @@ farm_trees,character,trees that bats are roosting in on farm sites,,"which types
 artificial_roost,binary,if artifical roost is present,yes; no,"if farm site, is the roost artificial?"
 cave_height_low,numeric,"lowest cave entrance height, meters",,"the cave entrance at its lowest point. If there are multiple entrances to the cave, the lowest point of the lowest entrance"
 cave_height_high,numeric,"highest cave entrance height, meters",,"the cave entrance at its highest point. If there are multiple entrances to the cave, the highest point of the highest entrance"
-light_penetration,categorical,"in a cave, the degree to which light penetrates cave to guano area",0-20%; 21-50%; 51-80%; 81-100%,the approximate degree to which light penetrates the cave at the guano collection area (i.e. is the cave dark or bright?)
 height_harvest_area,integer,"in a cave, the height of the guano harvesting area",,the approximate height of the area in which guano is harvested
+light_penetration,categorical,"in a cave, the degree to which light penetrates cave to guano area",0-20%; 21-50%; 51-80%; 81-100%,the approximate degree to which light penetrates the cave at the guano collection area (i.e. is the cave dark or bright?)
 water_coverage,categorical,the extent to which water covers the cave area,little to none (0-20%); some (21-50%); most or all (51-100%),if water covers the cave during guano harvesting season
 cave_navigation,categorical,ease of navigation into the cave,"walk in, open area; some difficulty walking, lower parts requiring ducking; difficulty navigating, crawling required",
 bats_present_harvest,binary,if bats are present when guano is being harvested,yes; no,
@@ -29,6 +29,7 @@ harvester_age_range,character,age range of guano harvesters,,
 origin_of_harvesters,character,where harvesters are from,local; seasonal; other,if harvesters are from a local area or are temporary/migrant workers
 number_of_non_harvesters,character,number of non-harvesters in guano exposure area,,number of non-harvesters in the guano exposure area (i.e. the area where guano is being harvested). To measure whether or not the non-harvesters are being exposed to guano.
 duration_harvest,character,how many minutes per person a guano harvester spends in the guano exposure area (range),,
+duration_active_harvest,character,"how many minutes per person a guano harvester spends in the guano exposure area (range), subtracting non-harvesting time ",,
 frequency_of_harvesting,character,frequency of guano harvesting at site,daily; weekly; monthly; annually,"frequency that a site is harvested as x times per unit of week, month or year"
 frequency_per_person,character,frequency of harvesting per person,once every x days/weeks/month per year,frequency that a person is harvesting as x times per day/week/month per year
 months_harvested,character,months during which guano is harvested,,
