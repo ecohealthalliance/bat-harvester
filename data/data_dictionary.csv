@@ -12,11 +12,13 @@ site_longitude,numeric,"longitude of site, in decimal degrees",,
 gps_uncertainty,numeric,gps uncertainty of lat/long estimate,,if there is a known error estimate for a GPS estimate
 site_type,categorical,whether the site is a cave or farm site,cave; farm; other,
 access_control,character,what kind of access control is present at the farm or cave site,,What kind of barrier to access exists at the cave/farm site?
+area_guano,categorical,"in m^2, what is the approximate area of guano coverage",,
+depth_guano,categorical,"in cm, what is the approximate depth of guano-covered area",,
 farm_trees,character,trees that bats are roosting in on farm sites,,"which types of trees are bats roosting in? if the roost is artificial, what types of trees are being used to construct the artifical roost"
 artificial_roost,binary,if artifical roost is present,yes; no,"if farm site, is the roost artificial?"
 cave_height_low,numeric,"lowest cave entrance height, meters",,"the cave entrance at its lowest point. If there are multiple entrances to the cave, the lowest point of the lowest entrance"
 cave_height_high,numeric,"highest cave entrance height, meters",,"the cave entrance at its highest point. If there are multiple entrances to the cave, the highest point of the highest entrance"
-height_harvest_area,integer,"in a cave, the height of the guano harvesting area",,the approximate height of the area in which guano is harvested
+height_harvest_area,integer,"in a cave, the height of the guano harvesting area, meters",,the approximate height of the area in which guano is harvested
 light_penetration,categorical,"in a cave, the degree to which light penetrates cave to guano area",0-20%; 21-50%; 51-80%; 81-100%,the approximate degree to which light penetrates the cave at the guano collection area (i.e. is the cave dark or bright?)
 water_coverage,categorical,the extent to which water covers the cave area,little to none (0-20%); some (21-50%); most or all (51-100%),if water covers the cave during guano harvesting season
 cave_navigation,categorical,ease of navigation into the cave,"walk in, open area; some difficulty walking, lower parts requiring ducking; difficulty navigating, crawling required",
