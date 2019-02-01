@@ -1,0 +1,155 @@
+---
+title: "Bat-Harvester Data Summary"
+author: "Shirley Chen"
+date: "January 25, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE, message = FALSE}
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+
+library(tidyverse)
+library(kableExtra)
+library(leaflet)
+library(here)
+```
+
+
+```{r questionnaire-data, echo = FALSE, message = FALSE}
+bh <- read_csv(here("data", "bat_harvester_questionnaire.csv")) %>%
+  mutate_at(vars("site_latitude", "site_longitude"), as.numeric) %>%
+  mutate(depth_guano = if_else(depth_guano == "30-Nov", "11-30", depth_guano),
+         depth_guano = if_else(depth_guano == "10-Jun", "6-10", depth_guano))
+```
+
+### General Site Information
+
+As of  `r format(Sys.time(), '%B %d, %Y')`, data on bat guano-harvester interactions is available for `r bh %>% select(country) %>% unique() %>% nrow()` countries : `r unique(bh$country)`. All are PREDICT sites except Kimpese/Weene in the Democratic Republic of Congo.  
+
+```{r leaflet, echo = FALSE, message = FALSE}
+leaflet(bh) %>% addTiles() %>% addMarkers(~site_longitude, ~site_latitude, popup = paste0(bh$local_site_name, ", ",  bh$country))
+```
+
+```{r sites, echo = FALSE, message = FALSE}
+options(knitr.kable.NA = '')
+bh %>% select("Site Name" = local_site_name, "Country" = country,
+              "Type" = site_type) %>%
+  kable(format = 'markdown', padding = 1L)
+```
+
+`r str_which("cave", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *cave* interface, where bat guano is harvested from fecal matter of bats roosting in caves. Only caves were access-controlled, with some sites (Myanmar) primarly functioning as a religious temple, while others required a permit or verbal permission to enter. Other interesting variables for cave sites include _cave height_, _degree of light penetration_, _degree of water coverage_, and _ease of cave navigation_.
+
+`r str_which("farm", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *farm* interface, where bat guano is harvested from artificial roosts set up below tree-like structures (Fig. 1, below). Both farm sites had artifical roosts composed of sugar palm leaves. 
+
+```{r farm_picture, echo = FALSE, fig.cap = "Fig 1. Guano farm site, Viet Nam"}
+knitr::include_graphics("data/pictures/181225_BatGuanoFarm01.1.JPG")
+```
+
+Bats were present during harvest at all sites. Most roosts were 1,000 - 5,000 bats in size, except the Viet Nam cave site where there were over 100,000 bats, potentially as high as 3 million depending on the season. 
+
+```{r bat_size, fig.cap = "Fig 2. Roost sizes across sites"}
+roost <- bh %>%
+  select(site_name, bat_roost_size) %>%
+  mutate(bat_roost_size = str_replace_all(bat_roost_size, ">|-3 million", ""),
+         bat_roost_size = as.numeric(bat_roost_size))
+
+ggplot(roost) + geom_point(aes(x = roost$site_name, y = roost$bat_roost_size)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), axis.title.x = element_blank()) +
+  ylab("Roost Size")
+```
+
+
+### Harvesters
+
+The DRC and Vietnam cave sites had the highest number of harvesters, and some of the highest frequencies of harvest. All Viet Nam sites were harvested frequently, both at cave and farm sites. 
+
+```{r harvesters, echo = FALSE, message = FALSE}
+bh %>% select(site_name, number_of_harvesters, duration_active_harvest, frequency_of_harvesting) %>%
+  mutate(duration_active_harvest = 
+           str_replace_all(duration_active_harvest, "60-210 minutes; |30 minutes; |typical|120 minutes; |300 minutes; |15-|20-", "")) %>%
+  rename("Site Name" = site_name, 
+         "Number of Harvesters" = number_of_harvesters,
+         "Duration of Harvesting" = duration_active_harvest,
+         "Frequency of Harvesting" = frequency_of_harvesting) %>%
+  kable(format = 'markdown') %>%
+  kable_styling(position = "left")
+```
+
+All harvesters were local in origin, although Myanmar Caves 2 and 3 also had seasonal harvesters come in. Non-harvesters were present at the guano harvesting areas for all sites except the DRC cave; this included locals at all sites, children at all Myanmar sites and at the Viet Nam Cave site, and 10-20 tourists per day at Myanmar Cave 3 (Saddan Cave) site. Limits to harvesting included bat migration elsewhere (5/7 sites), high water levels (2 cave sites), low demand (2 cave sites) , and hunting of bats for food by locals (cave and farm site in Viet Nam). 
+
+Activities at all sites included harvesting, packaging, and storing guano. Selling guano also occurred at all Myanmar and Viet Nam sites. 
+
+```{r months_harvested, echo = FALSE}
+months <- bh %>% select(site_name, months_harvested)
+month_long <- months %>% spread(site_name, months_harvested)
+
+```
+
+```{r site_activities, echo = FALSE}
+activities <- bh %>% select(site_name, activities_around_site)
+activities_long <- activities %>% spread(site_name, activities_around_site)
+```
+
+### Guano
+
+Sites in Myanmar were harvested the least frequently, ranging from 3 times/month to once a year. Despite this, MMR-Cave-2 (Buffalo Cave) had the highest collection volume at approximately 54,000 kg annually. Collection occured daily or several times a week at the DRC and Viet Nam sites, with volumes ranging from 312 - 3000 kg collected per year. 
+
+```{r guano, echo = FALSE}
+# Method of guano collection
+bh$guano_annual <- c(400, 54000, 3000, 1000, 312, 1460, 3000)
+
+bh %>% select("Site Name" = site_name, 
+                       "Frequency of Harvesting" = frequency_of_harvesting,
+              "Collection Method" = collection_method,
+                       "Guano Collected Annually (kg)" = guano_annual) %>%
+    kable(format = 'markdown') %>%
+  kable_styling(position = "left")
+```
+
+Bat species contributions to the guano were as follows:
+
+```{r bat_species}
+bh %>% 
+  mutate(bat_species_contribution = str_replace_all(bat_species_contribution,
+                                                    "Hipposideros larvatus", "Hipposideros larvatus: 100%")) %>%
+  select("Site Name" = site_name, 
+              "Species Contribution" = bat_species_contribution) %>%
+    kable(format = 'markdown') %>%
+  kable_styling(position = "left")
+
+```
+
+### Protective Practices and Equipment 
+
+```{r ppe, echo = FALSE}
+ppe <- bh %>% select(site_name,
+  gloves = ppe_gloves, 
+  mask = ppe_mask,
+  makeshift_mask = ppe_makeshift_mask,
+  shoes = ppe_shoes,
+  clothing = ppe_clothing,
+  wash_shoes, 
+  wash_feet,
+  wash_hands,
+  wash_body,
+  shovels = tools_shovels,
+  spades = tools_spades,
+  brooms = tools_brooms,
+  hands_only = tools_hands_only,
+  water_available,
+  harvesters_washing,
+  harvesters_soaping) %>%
+  mutate(harvesters_washing = str_replace_all(harvesters_washing, "4-Mar", "3-4"),
+         harvesters_washing = str_replace_all(harvesters_washing, "30-Oct", "11-30")) %>%
+      kable(format = 'markdown') %>%
+  kable_styling(position = "left")
+
+```
+
+### Observations and Notes
+
+Often, though water was not available directly on site for washing, harvesters washed their bodies in nearby rivers (Myanmar Cave Sites 1 and 2, Viet Nam Cave site).Another risky practice not explicitly covered in the questionnaire but derived from responses is eating lunch and snacks in the cave during breaks from harvesting guano. 
