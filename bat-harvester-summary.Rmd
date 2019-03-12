@@ -45,9 +45,8 @@ bh %>% select("Site Name" = local_site_name, "Country" = country,
 
 `r str_which("farm", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *farm* interface, where bat guano is harvested from artificial roosts set up below tree-like structures (Fig. 1, below). Both farm sites had artifical roosts composed of sugar palm leaves. 
 
-```{r farm_picture, echo = FALSE, fig.cap = "Fig 1. Guano farm site, Viet Nam"}
-knitr::include_graphics("data/pictures/181225_BatGuanoFarm01.1.JPG")
-```
+![](data/pictures/vnm_guano_farm1.jpg){ width=50% }
+![Figures 1-2.  Guano farm site, Viet Nam](data/pictures/vnm_guano_farm2.jpg){ width=40% }
 
 Bats were present during harvest at all sites. Most roosts were 1,000 - 5,000 bats in size, except the Viet Nam cave site where there were over 100,000 bats, potentially as high as 3 million depending on the season. 
 
@@ -86,7 +85,6 @@ Activities at all sites included harvesting, packaging, and storing guano. Selli
 ```{r months_harvested, echo = FALSE}
 months <- bh %>% select(site_name, months_harvested)
 month_long <- months %>% spread(site_name, months_harvested)
-
 ```
 
 ```{r site_activities, echo = FALSE}
@@ -98,57 +96,66 @@ activities_long <- activities %>% spread(site_name, activities_around_site)
 
 Sites in Myanmar were harvested the least frequently, ranging from 3 times/month to once a year. Despite this, MMR-Cave-2 (Buffalo Cave) had the highest collection volume at approximately 54,000 kg annually. Collection occured daily or several times a week at the DRC and Viet Nam sites, with volumes ranging from 312 - 3000 kg collected per year. 
 
-```{r guano, echo = FALSE}
-# Method of guano collection
-bh$guano_annual <- c(400, 54000, 3000, 1000, 312, 1460, 3000)
+### Exposure and Risk
 
-bh %>% select("Site Name" = site_name, 
-                       "Frequency of Harvesting" = frequency_of_harvesting,
-              "Collection Method" = collection_method,
-                       "Guano Collected Annually (kg)" = guano_annual) %>%
-    kable(format = 'markdown') %>%
-  kable_styling(position = "left")
-```
+```{r}
+risk <- read_csv(here("data", "harvester_summary.csv"))
 
-Bat species contributions to the guano were as follows:
-
-```{r bat_species}
-bh %>% 
-  mutate(bat_species_contribution = str_replace_all(bat_species_contribution,
-                                                    "Hipposideros larvatus", "Hipposideros larvatus: 100%")) %>%
+risk %>% 
+  mutate(exp_all = (exp_guano + exp_collect + exp_ppe + exp_wash)/4) %>%
+  mutate_if(is.numeric, scales::comma_format(accuracy = 0.01, big.mark = ",", decimal.mark = ".")) %>%
+  #mutate_if(is.numeric, round, 2) %>%
   select("Site Name" = site_name, 
-              "Species Contribution" = bat_species_contribution) %>%
+         "Number of Harvesters" = number_of_harvesters,
+         "Frequency of Harvesting (days per year)" = days_per_year,
+         "Guano Collected (kg, monthly)" = guano_person_month,
+         "Guano Collected (kg, annually)" = guano_person_year,
+         "Duration of Harvesting (min., annually)" = duration_harvest_year, 
+         "Guano Exposures" = exp_guano,
+         "Collection Exposures" = exp_collect,
+         "PPE Exposures" = exp_ppe,
+         "WASH Exposures" = exp_wash,
+         "All Exposure" = exp_all) %>%
     kable(format = 'markdown') %>%
   kable_styling(position = "left")
 
 ```
 
-### Protective Practices and Equipment 
+A value between 0 and 1 for exposures from environmental guano, collection, PPE, and WASH was calculated by assigning a relative value for each level of exposure (no risk, medium risk, high risk).
 
-```{r ppe, echo = FALSE}
-ppe <- bh %>% select(site_name,
-  gloves = ppe_gloves, 
-  mask = ppe_mask,
-  makeshift_mask = ppe_makeshift_mask,
-  shoes = ppe_shoes,
-  clothing = ppe_clothing,
-  wash_shoes, 
-  wash_feet,
-  wash_hands,
-  wash_body,
-  shovels = tools_shovels,
-  spades = tools_spades,
-  brooms = tools_brooms,
-  hands_only = tools_hands_only,
-  water_available,
-  harvesters_washing,
-  harvesters_soaping) %>%
-  mutate(harvesters_washing = str_replace_all(harvesters_washing, "4-Mar", "3-4"),
-         harvesters_washing = str_replace_all(harvesters_washing, "30-Oct", "11-30")) %>%
-      kable(format = 'markdown') %>%
-  kable_styling(position = "left")
+*Guano Exposure* encompasses environmental guanoe exposures and is calculated from
 
-```
+-   Guano Area
+-   Guano Depth
+-   Bat Roost Size
+
+*Collection Exposure* is a function of the method that harvesters used to collect the guano - with riskier practices like using hands only to collect guano contributing to a higher exposure value:
+
+-   Use of shovel
+-   Use of spade 
+-   Use of broom 
+-   Use of hands only
+
+*PPE Exposure* are protective factors related to the wearing of protective equipment and clothing:
+
+-   Wearing Gloves
+-   Wearing Goggles
+-   Wearing Shoes
+-   Wearing a Mask or Makeshift Mask 
+-   Wearhing Shoes
+-   Wearing Clothing specifically for Guano Harvesting
+
+*Water, Sanitation, Hygiene* factors refer to the availability and use of water and soap for washing and are a summary of the following:
+
+-   Washing after harvesting
+-   Use of soap for washing
+-   Washing of shoes post guano exposure
+-   Washing of feet post guano exposure
+-   Washing of hands post guano exposure
+-   Washing of body post guano exposure
+
+
+The DRC site had the highest risk exposure value (0.75) attributed to riskier collection practices such as the use of hands to harvest guano instead of other implements. While Viet Nam Farm Site 2 had the lowest overall risk exposure value (0.44), guano is harvested for approximately 7,300 minutes per year per harvester. Though the Viet Nam Cave Site did not have a particularly high risk exposure value, guano is harvested for 65,700 minutes (`1/60 * 65700` hours) per year at a total volume 7,300 kg of guano harvested. 
 
 ### Observations and Notes
 
