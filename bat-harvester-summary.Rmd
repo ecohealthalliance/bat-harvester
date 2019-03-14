@@ -1,7 +1,6 @@
 ---
 title: "Bat-Harvester Data Summary"
-author: "Shirley Chen"
-date: "January 25, 2019"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: html_document
 ---
 
@@ -13,17 +12,39 @@ knitr::opts_chunk$set(
 )
 
 library(tidyverse)
+library(here)
 library(kableExtra)
 library(leaflet)
-library(here)
+library(magrittr)
 ```
 
 
-```{r questionnaire-data, echo = FALSE, message = FALSE}
+```{r questionnaire-data, echo=FALSE, message=FALSE, warning=TRUE}
 bh <- read_csv(here("data", "bat_harvester_questionnaire.csv")) %>%
   mutate_at(vars("site_latitude", "site_longitude"), as.numeric) %>%
   mutate(depth_guano = if_else(depth_guano == "30-Nov", "11-30", depth_guano),
          depth_guano = if_else(depth_guano == "10-Jun", "6-10", depth_guano))
+
+sites <- bh %>%
+  select(site_name, local_site_name, country, site_latitude, site_longitude)
+
+risk <- read_csv(here("data", "harvester_summary.csv")) %>% 
+  mutate(exp_all = (exp_guano + exp_collect + exp_ppe + exp_wash)/4) %>%
+  mutate(days_per_year = days_per_year*365) %>%
+  mutate(duration_harvest_year = duration_harvest_year/60) %>%
+  mutate(total_guano = guano_person_year * number_of_harvesters) %>%
+  mutate(months_harvested = case_when(
+    str_count(months_harvested, ";") == 11 ~ "Jan-Dec",
+    str_detect(months_harvested, "January; February; March; October; November; Decembe")  ~ "Jan-Mar, Nov-Dec",
+    str_detect(months_harvested, "March; April; May; November; December") ~ "Mar-May, Nov-Dec",
+    str_detect(months_harvested, "May; June; July; August") ~ "May-Aug",
+    TRUE ~ "once a year"
+  )) %>%
+  mutate_at(vars(contains("exp")), funs(round(., 2))) %>%
+  mutate_at(c('guano_person_month', 'guano_person_year', 'duration_harvest_year', 'total_guano'),
+            scales::comma_format(big.mark = ",")) %>%
+  left_join(sites)
+
 ```
 
 ### General Site Information
@@ -31,7 +52,12 @@ bh <- read_csv(here("data", "bat_harvester_questionnaire.csv")) %>%
 As of  `r format(Sys.time(), '%B %d, %Y')`, data on bat guano-harvester interactions is available for `r bh %>% select(country) %>% unique() %>% nrow()` countries : `r unique(bh$country)`. All are PREDICT sites except Kimpese/Weene in the Democratic Republic of Congo.  
 
 ```{r leaflet, echo = FALSE, message = FALSE}
-leaflet(bh) %>% addTiles() %>% addMarkers(~site_longitude, ~site_latitude, popup = paste0(bh$local_site_name, ", ",  bh$country))
+popup <- paste0(risk$site_name, "<br/>Annual Guano Volume (kg): ", risk$total_guano)
+
+leaflet(risk) %>% 
+  addTiles() %>% 
+  addMarkers(~site_longitude, ~site_latitude, 
+             popup = popup)
 ```
 
 ```{r sites, echo = FALSE, message = FALSE}
@@ -98,45 +124,55 @@ Sites in Myanmar were harvested the least frequently, ranging from 3 times/month
 
 ### Exposure and Risk
 
-```{r}
-risk <- read_csv(here("data", "harvester_summary.csv"))
+```{r risk-explanation}
 
-risk %>% 
-  mutate(exp_all = (exp_guano + exp_collect + exp_ppe + exp_wash)/4) %>%
-  mutate_if(is.numeric, scales::comma_format(accuracy = 0.01, big.mark = ",", decimal.mark = ".")) %>%
-  #mutate_if(is.numeric, round, 2) %>%
+risk2 <- risk %>%
+  mutate_at(vars(contains("exp")), 
+            funs(case_when(. <= 0.2 ~ "lowest risk",
+                           . > 0.2 & . <= 0.4 ~ "low risk",
+                           . > 0.4 & . <= 0.6 ~ "medium risk",
+                           . > 0.6 & . <= 0.8 ~ "high risk",
+                           . > 0.8 ~ "highest risk",
+                           TRUE ~ NA_character_))) %>%
   select("Site Name" = site_name, 
-         "Number of Harvesters" = number_of_harvesters,
          "Frequency of Harvesting (days per year)" = days_per_year,
-         "Guano Collected (kg, monthly)" = guano_person_month,
-         "Guano Collected (kg, annually)" = guano_person_year,
-         "Duration of Harvesting (min., annually)" = duration_harvest_year, 
+         "Duration of Harvesting (hours per year)" = duration_harvest_year, 
+         "Guano Collected (kg per person per year)" = guano_person_year,
          "Guano Exposures" = exp_guano,
          "Collection Exposures" = exp_collect,
          "PPE Exposures" = exp_ppe,
          "WASH Exposures" = exp_wash,
-         "All Exposure" = exp_all) %>%
-    kable(format = 'markdown') %>%
-  kable_styling(position = "left")
-
+         "All Exposure" = exp_all,
+         "Months Harvested" = months_harvested,
+         "Number of Harvesters" = number_of_harvesters,
+         "Total Guano Collected (kg)" = total_guano) 
+risk2 %>%
+    kable(format = "html", align = "l") %>%
+  kable_styling(bootstrap_options = "striped") %>%
+  add_header_above(c(" ", "Individual Exposures" = 9, "Population Exposures" = 2))
 ```
 
-A value between 0 and 1 for exposures from environmental guano, collection, PPE, and WASH was calculated by assigning a relative value for each level of exposure (no risk, medium risk, high risk).
+An exposure risk level was calculated from groupings of exposure variables: Guano Exposures, Collection Exposures, Personal and Protective Equipment (PPE) Exposures, and Water, Sanitation and Hygiene (WASH) Exposures. Each variable was assigned a relative exposure risk level:
+-   Lowest risk: <0.2
+-   Low risk: 0.2-0.4
+-   Medium risk: 0.4-0.6
+-   High risk: 0.6-0.8
+-   Highest risk: >0.8.
 
-*Guano Exposure* encompasses environmental guanoe exposures and is calculated from
+*Guano Exposures* refer to environmental guano exposures, and are calculated from: 
 
 -   Guano Area
 -   Guano Depth
 -   Bat Roost Size
 
-*Collection Exposure* is a function of the method that harvesters used to collect the guano - with riskier practices like using hands only to collect guano contributing to a higher exposure value:
+*Collection Exposures* are a function of the method that harvesters used to collect the guano - with riskier practices like using hands only to collect guano contributing to a higher exposure value:
 
 -   Use of shovel
 -   Use of spade 
 -   Use of broom 
 -   Use of hands only
 
-*PPE Exposure* are protective factors related to the wearing of protective equipment and clothing:
+*PPE Exposures* are protective factors related to the wearing of protective equipment and clothing:
 
 -   Wearing Gloves
 -   Wearing Goggles
@@ -155,7 +191,7 @@ A value between 0 and 1 for exposures from environmental guano, collection, PPE,
 -   Washing of body post guano exposure
 
 
-The DRC site had the highest risk exposure value (0.75) attributed to riskier collection practices such as the use of hands to harvest guano instead of other implements. While Viet Nam Farm Site 2 had the lowest overall risk exposure value (0.44), guano is harvested for approximately 7,300 minutes per year per harvester. Though the Viet Nam Cave Site did not have a particularly high risk exposure value, guano is harvested for 65,700 minutes (`1/60 * 65700` hours) per year at a total volume 7,300 kg of guano harvested. 
+The DRC site had the highest risk exposure value (0.75) attributed to riskier collection practices such as the use of hands to harvest guano instead of other implements. While Viet Nam Farm Site 2 had the lowest overall risk exposure value (0.44), guano is harvested for approximately 7,300 minutes per year per harvester. Though the Viet Nam Cave Site did not have a particularly high risk exposure value, guano is harvested for 65,700 minutes (`r 1/60 * 65700` hours) per year at a total volume 7,300 kg of guano harvested. 
 
 ### Observations and Notes
 
