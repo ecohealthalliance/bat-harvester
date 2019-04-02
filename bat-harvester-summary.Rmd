@@ -67,14 +67,14 @@ bh %>% select("Site Name" = local_site_name, "Country" = country,
   kable(format = 'markdown', padding = 1L)
 ```
 
-`r str_which("cave", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *cave* interface, where bat guano is harvested from fecal matter of bats roosting in caves. Only caves were access-controlled, with some sites (Myanmar) primarly functioning as a religious temple, while others required a permit or verbal permission to enter. Other interesting variables for cave sites include _cave height_, _degree of light penetration_, _degree of water coverage_, and _ease of cave navigation_.
+`r str_which("cave", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *cave* interface, where bat guano is harvested from fecal matter of bats roosting in caves. Only caves were access-controlled, with some sites (Myanmar) primarly functioning as a religious temple, while others required a permit or verbal permission to enter. 
 
 `r str_which("farm", bh$site_type) %>% length()` of the `r nrow(bh)` sites are at the *farm* interface, where bat guano is harvested from artificial roosts set up below tree-like structures (Fig. 1, below). Both farm sites had artifical roosts composed of sugar palm leaves. 
 
 ![](data/pictures/vnm_guano_farm1.jpg){ width=50% }
 ![Figures 1-2.  Guano farm site, Viet Nam](data/pictures/vnm_guano_farm2.jpg){ width=40% }
 
-Bats were present during harvest at all sites. Most roosts were 1,000 - 5,000 bats in size, except the Viet Nam cave site where there were over 100,000 bats, potentially as high as 3 million depending on the season. 
+Bats were present during harvest at all sites. Most roosts were 1,000 - 5,000 bats in size, except the Viet Nam cave site where roost size was estimated between 100,000 to million, dependent on nseason. 
 
 ```{r bat_size, fig.cap = "Fig 2. Roost sizes across sites"}
 roost <- bh %>%
@@ -82,20 +82,18 @@ roost <- bh %>%
   mutate(bat_roost_size = str_replace_all(bat_roost_size, ">|-3 million", ""),
          bat_roost_size = as.numeric(bat_roost_size))
 
-ggplot(roost) + geom_point(aes(x = roost$site_name, y = roost$bat_roost_size)) +
+ggplot(roost) + geom_point(aes(x = roost$site_name, y = format(roost$bat_roost_size, big.mark = ",", scientific = FALSE))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1), axis.title.x = element_blank()) +
-  ylab("Roost Size")
+  ylab("Roost Size") + xlab("") + theme_minimal()
 ```
 
 
-### At a Glance
-
-#### Havesters
+#### Harvesters
 
 The DRC and Vietnam cave sites had the highest number of harvesters, and some of the highest frequencies of harvest. All Viet Nam sites were harvested frequently, both at cave and farm sites. 
 
 ```{r harvesters, echo = FALSE, message = FALSE}
-bh %>% select(site_name, number_of_harvesters, duration_active_harvest, frequency_of_harvesting) %>%
+bh %>% select(site_name, local_site_name, number_of_harvesters, duration_active_harvest, frequency_of_harvesting) %>%
   mutate(duration_active_harvest = 
            str_replace_all(duration_active_harvest, "60-210 minutes; |30 minutes; |typical|120 minutes; |300 minutes; |15-|20-", "")) %>%
   rename("Site Name" = site_name, 
@@ -103,7 +101,7 @@ bh %>% select(site_name, number_of_harvesters, duration_active_harvest, frequenc
          "Number of Harvesters" = number_of_harvesters,
          "Duration of Harvesting" = duration_active_harvest,
          "Frequency of Harvesting" = frequency_of_harvesting) %>%
-  kable(format = 'markdown') %>%
+  kable(format = 'html') %>%
   kable_styling(position = "left")
 ```
 
@@ -126,6 +124,8 @@ activities_long <- activities %>% spread(site_name, activities_around_site)
 Sites in Myanmar were harvested the least frequently, ranging from 3 times/month to once a year. Despite this, MMR-Cave-2 (Buffalo Cave) had the highest collection volume at approximately 54,000 kg annually. Collection occured daily or several times a week at the DRC and Viet Nam sites, with volumes ranging from 312 - 3000 kg collected per year. 
 
 ### Harvester Exposures
+
+Exposures to guano vary by site based on frequency, duration, and volume of harvest, as well as in the use of tools, protective protective equipment (PPE), and water, sanitation, and hygiene practices (WASH) for harvesting. The sites ranged in their production levels and purposes for guano harvest; 1 harvester at VNM-Farm-1 harvested 156 kg of guano annually compared to 50 harvesters at the DRC-Cave-1 site that collected a similar amount of guano in a year. Duration of harvest spanned from 4 hours to 1,095 hours annually, guano was harvested from once a year to daily, and annual volumes ranged from 156 to 7,300 kg. VNM-Cave-1 had the highest level of guano harvesting, in frequency, duration, and volume connected.
 
 ```{r risk-explanation}
 
@@ -153,8 +153,7 @@ risk2 <- risk %>%
   select("Site Name" = site_name, 
          "Frequency of Harvesting (days per year)" = days_per_year,
          "Duration of Harvesting (hours per year)" = duration_harvest_year, 
-         "Guano Collected (kg per person per year)" = guano_person_year,
-         "Guano Exposures" = exp_guano,
+         "Guano Collected (kg per year)" = guano_person_year,
          "Collection Exposures" = exp_collect,
          "PPE Exposures" = exp_ppe,
          "WASH Exposures" = exp_wash,
@@ -164,10 +163,12 @@ risk2 <- risk %>%
 risk2 %>%
     kable(format = "html", align = "l") %>%
   kable_styling(bootstrap_options = "striped") %>%
-  add_header_above(c(" ", "Individual Exposures" = 8, "Population Exposures" = 2))
+  add_header_above(c(" ", "Individual Exposures" = 7, "Population Exposures" = 2)) %>%
+  scroll_box(width = "100%", height = "100%")
 ```
 
-Exposures to guano are modulated by three groups of :
+The exposure groups are composed of the following variables:
+
 1) Collection Exposures
 
 *Collection Exposures* are the method that harvesters used to collect the guano: 
@@ -181,12 +182,12 @@ Exposures to guano are modulated by three groups of :
 
 *PPE Exposures* are protective factors related to the wearing of protective equipment and clothing:
 
--   Wearing Gloves
--   Wearing Goggles
--   Wearing Shoes
--   Wearing a Mask or Makeshift Mask 
--   Wearhing Shoes
--   Wearing Clothing specifically for Guano Harvesting
+-   Wearing gloves
+-   Wearing goggles
+-   Wearing shoes
+-   Wearing a mask or makeshift mask 
+-   Wearing shoes
+-   Wearing clothing specifically for guano harvesting
 
 3) Water, Sanitation and Hygiene (WASH) Exposures
 
@@ -202,3 +203,9 @@ Exposures to guano are modulated by three groups of :
 ### Observations and Notes
 
 Often, though water was not available directly on site for washing, harvesters washed their bodies in nearby rivers (Myanmar Cave Sites 1 and 2, Viet Nam Cave site). Another risky practice not explicitly covered in the questionnaire but derived from responses is eating lunch and snacks in the cave during breaks from harvesting guano. 
+
+### Next Steps
+
+-   Review of data by country teams
+-   Determine importance and weight of variables to harvester risk
+-   Define risk reduction by practices, equipment, and collection method
